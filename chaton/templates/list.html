@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chats</title>
+</head>
+<body>
+
+<ul>
+{% for object in object_list %}
+    <li>
+        {% if object.unread %}<strong>{% endif %}
+        <a href="{% url 'chat-respond' hash=object.hash %}">{{object.hash}} ({{object.created}})</a>
+        {% if object.unread %}</strong>{% endif %}
+        {{ object.title }}
+
+    </li>
+{% endfor %}
+
+</ul>
+</body>
+</html>

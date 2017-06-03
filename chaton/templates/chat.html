@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat: {{ object.hash }}</title>
+</head>
+<body>
+<div>
+    <p>
+        This is secret page, remember it.
+    </p>
+</div>
+<p>
+    <span>{{ object.created }}</span>
+    <blockquote>{{ object.title }}</blockquote>
+</p>
+{% for message in object.message_set.all %}
+<div>
+    <span><strong>{{ message.get_sender_display }}</strong> on {{ message.sent }}:</span>
+    <blockquote>
+     {{ message.message }}
+    </blockquote>
+</div>
+{% endfor %}
+
+<div>
+    <h2>New message</h2>
+    <form method="post">
+        {{ form.as_p }}
+        {% csrf_token %}
+        <input type="hidden" name="from" value="chat">
+
+        <input type="submit">
+    </form>
+</div>
+</body>
+</html>
