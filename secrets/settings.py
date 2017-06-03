@@ -19,7 +19,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
+# SECURITY WARNING: keep the secrets key used in production secrets!
 SECRET_KEY = 'rf&uob2j1ifh=n1=jo$j@b#lm=huh#xf*-w*qu&p4mgs(3v@8i'
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -51,7 +51,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'sercets.urls'
+ROOT_URLCONF = 'secrets.urls'
 
 TEMPLATES = [
     {
@@ -69,7 +69,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'sercets.wsgi.application'
+WSGI_APPLICATION = 'secrets.wsgi.application'
 
 
 # Database

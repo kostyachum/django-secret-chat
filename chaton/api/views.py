@@ -1,13 +1,13 @@
 import hashlib
 
 from rest_framework.exceptions import ValidationError, NotFound
-from rest_framework.generics import ListAPIView, RetrieveAPIView
+from rest_framework.generics import ListAPIView, RetrieveAPIView, CreateAPIView
 from rest_framework.response import Response
 from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser
 
-from chaton.api.serializers import MessageSerializer, ChatSerializer, ChatListSerializer, ChatDetailSerializer
+from chaton.api import serializers
 from .. import config
 from ..models import Chat
 
@@ -17,7 +17,7 @@ class ChatListView(ListAPIView):
     Chat list without password
     """
     queryset = Chat.objects.all()
-    serializer_class = ChatListSerializer
+    serializer_class = serializers.ChatListSerializer
     permission_classes = [IsAdminUser]
 
     def get_queryset(self):
@@ -32,12 +32,18 @@ class ChatRespondView(RetrieveAPIView):
     POST: adds new message as RESPONDENT
     """
     queryset = Chat.objects.all()
-    serializer_class = ChatDetailSerializer
+    serializer_class = serializers.ChatDetailSerializer
     permission_classes = [IsAdminUser]
 
     lookup_field = 'hash'
     lookup_url_kwarg = 'hash'
-
+    
+    def get(self, request, *args, **kwargs):
+        obj = self.get_object()
+        obj.unread = False
+        obj.save()
+        return super(ChatRespondView, self).get(request, *args, **kwargs)
+    
     def post(self, request, hash):
         """
         Adds new message to the chat
@@ -45,7 +51,7 @@ class ChatRespondView(RetrieveAPIView):
         password -- chat password
         """
         chat = self.get_object()
-        serializer = MessageSerializer(data=request.data)
+        serializer = serializers.MessageSerializer(data=request.data)
         if serializer.is_valid():
             return self._save_message(chat, serializer)
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
@@ -56,6 +62,10 @@ class ChatRespondView(RetrieveAPIView):
         serializer.validated_data['chat'] = chat
         serializer.save()
         return Response(serializer.data, status=HTTP_201_CREATED)
+
+
+class AddChatView(CreateAPIView):
+    serializer_class = serializers.AddChatSerializer
 
 
 class ChatMessageList(APIView):
@@ -70,7 +80,7 @@ class ChatMessageList(APIView):
         """
         chat = self._get_object(hash)
         self._validate_password(chat, request.query_params)
-        serializer = ChatSerializer(chat)
+        serializer = serializers.ChatSerializer(chat)
         return Response(serializer.data)
 
     def post(self, request, hash):
@@ -81,7 +91,7 @@ class ChatMessageList(APIView):
         """
         chat = self._get_object(hash)
         self._validate_password(chat, request.data)
-        serializer = MessageSerializer(data=request.data)
+        serializer = serializers.MessageSerializer(data=request.data)
         if serializer.is_valid():
             return self._save_message(chat, serializer)
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
@@ -95,6 +105,8 @@ class ChatMessageList(APIView):
         serializer.validated_data['sender'] = config.CHAT_OWNER
         serializer.validated_data['chat'] = chat
         serializer.save()
+        chat.unread = True
+        chat.save()
         return Response(serializer.data, status=HTTP_201_CREATED)
 
     @classmethod
