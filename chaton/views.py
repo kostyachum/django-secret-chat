@@ -1,3 +1,5 @@
+import json
+
 import hashlib
 
 from django.contrib.auth.mixins import PermissionRequiredMixin
@@ -7,6 +9,7 @@ from django.views.generic import CreateView, FormView, ListView
 from django.views.generic.detail import SingleObjectMixin, DetailView
 
 from chaton.forms import MessageForm, ChatForm, ChatLoginForm, MessageRespondForm
+from chaton.models import UserChatList
 from . import models, config
 
 
@@ -17,6 +20,25 @@ class ChatCreateView(CreateView):
 
     def get_success_url(self):
         return reverse('chat', kwargs={'hash': self.object.hash})
+
+    def form_valid(self, form):
+        response = super(ChatCreateView, self).form_valid(form)
+
+        user = self.request.user
+        password = self.request.POST['password']
+        if user.is_authenticated and self.request.POST.get('save_to_list') and user.check_password(password):
+            self._save_encrypted_list_of_chats(password)
+        return response
+
+    def _save_encrypted_list_of_chats(self, password):
+        user = self.request.user
+        users_chat_list, created = UserChatList.objects.get_or_create(user=user)
+        decrypt = UserChatList.decrypt(password, users_chat_list.chat_list)
+        dict_data = json.loads(decrypt.decode("utf-8")) if users_chat_list.chat_list else {'chats': []}
+        dict_data['chats'].append(self.object.hash)
+        json_data = json.dumps(dict_data)
+        users_chat_list.chat_list = UserChatList.encrypt(password, json_data)
+        users_chat_list.save()
 
 
 class ChatListView(PermissionRequiredMixin, ListView):
@@ -206,4 +228,14 @@ class ChatDetailView(SingleObjectMixin, FormView):
 
     def get_context_data(self, **kwargs):
         self.object = self.get_object()
-        return super(ChatDetailView, self).get_context_data(**kwargs)
+        ctx = super(ChatDetailView, self).get_context_data(**kwargs)
+        encrypt_list, created = UserChatList.objects.get_or_create(user=self.request.user)
+        chat_list = encrypt_list.chat_list
+        password = self.request.POST.get('password')
+        if chat_list and password and self.request.user.check_password(self.request.POST['password']):
+            decrypt = UserChatList.decrypt(password, chat_list)
+            try:
+                ctx['chat_list'] = json.loads(decrypt.decode("utf-8"))
+            except:
+                ctx['chat_list'] = 'Cannot unpack your list'
+        return ctx

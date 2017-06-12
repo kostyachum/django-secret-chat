@@ -22,6 +22,7 @@ class MessageRespondForm(forms.ModelForm):
 
 class ChatForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput(), required=False, help_text='can be empty')
+    save_to_list = forms.BooleanField()
 
     def save(self, commit=True):
         obj = super(ChatForm, self).save(commit=False)

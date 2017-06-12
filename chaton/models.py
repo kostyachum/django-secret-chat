@@ -1,3 +1,7 @@
+import base64
+
+from Crypto.Cipher import XOR
+from django.contrib.auth.models import User
 from django.db import models
 
 from chaton.config import CHAT_RESPONDENT, MESSAGE_SENDER_CHOICES
@@ -29,3 +33,18 @@ class Message(models.Model):
 
     def __str__(self):
         return 'Message {} Chat {}'.format(self.pk, self.chat.hash)
+
+
+class UserChatList(models.Model):
+    chat_list = models.TextField()
+    user = models.ForeignKey(User, unique=True)
+
+    @staticmethod
+    def encrypt(key, plaintext):
+        cipher = XOR.new(key)
+        return base64.b64encode(cipher.encrypt(plaintext))
+
+    @staticmethod
+    def decrypt(key, ciphertext):
+        cipher = XOR.new(key)
+        return cipher.decrypt(base64.b64decode(ciphertext))
