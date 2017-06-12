@@ -40,3 +40,7 @@ Admin Views:
 Chat list is sorted by unread first, by create date after. Once chat opened it marks as read, if new message from user added
 it marks as new.
 All messages from admin have sender 'RESPONDENT'
+
+
+## ToDo
+Work with user's password only so that we can easisly encrypt and decrypt. Right now will be issues when user uses some other password for chat. Probably good idea will be to have seperated password for user's chat list.
