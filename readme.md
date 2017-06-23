@@ -7,7 +7,7 @@ Allows to generate chat protected by password and allow admin to left answers
 - User don't need anything if he want just save chat link, or only his password if he wants to store encypted list of chats;
 - No user relations;
 - Chat can be shared to other people if needed;
-- Chat can be protected by passsowrd;
+- Chat can be protected by password;
 
 
 ## Application
