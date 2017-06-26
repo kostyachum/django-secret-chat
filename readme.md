@@ -1,6 +1,6 @@
 # Django Secret Chat
 
-Allows to generate chat protected by password and allow admin to left answers. Goal is not to make store data encrypted but enhance current one-way message with `respond` feature but still keep it user-friendly.
+Allows to generate chat protected by password and allow admin to left answers. Goal is not to store data encrypted but enhance current one-way message with `respond` feature but still keep it user-friendly.
 
 ## Features
 - Admin don't need anything to see messages and reply, just be an admin (or whatever role is choosen by product);
